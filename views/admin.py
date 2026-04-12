@@ -97,6 +97,7 @@ class AdminWindow(QWidget):
         btn_edit = QPushButton("Editar")
         btn_del = QPushButton("Eliminar")
         btn_game = QPushButton("Ir al juego")
+        btn_game.setProperty("accent", "true")
 
         btn_add.clicked.connect(self._on_add)
         btn_edit.clicked.connect(self._on_edit)

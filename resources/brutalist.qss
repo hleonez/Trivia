@@ -1,0 +1,119 @@
+/* Brutalist Styling - Global */
+QWidget {
+    background-color: #FFFFFF;
+    color: #000000;
+    font-size: 14px;
+}
+
+/* Base Inputs, Tables, Labels */
+QLabel {
+    color: #000000;
+    background: transparent;
+}
+
+QLineEdit, QComboBox {
+    background-color: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 0px;
+    padding: 6px;
+    color: #000000;
+    selection-background-color: #000000;
+    selection-color: #FFFFFF;
+}
+
+QLineEdit:focus, QComboBox:focus {
+    border: 2px solid #2563EB;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 25px;
+    border-left-width: 2px;
+    border-left-color: #000000;
+    border-left-style: solid;
+}
+
+/* Tables */
+QTableWidget {
+    background-color: #FFFFFF;
+    border: 3px solid #000000;
+    gridline-color: #000000;
+    selection-background-color: #000000;
+    selection-color: #FFFFFF;
+}
+
+QHeaderView::section {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+    padding: 4px;
+    font-weight: bold;
+}
+
+QTableCornerButton::section {
+    background-color: #000000;
+}
+
+/* Base PushButtons */
+QPushButton {
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 3px solid #000000;
+    border-radius: 0px;
+    padding: 8px 16px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #E5E5E5;
+}
+
+QPushButton:pressed {
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+/* Accent Buttons */
+QPushButton[accent="true"] {
+    background-color: #2563EB;
+    color: #FFFFFF;
+    border: 3px solid #000000;
+}
+
+QPushButton[accent="true"]:hover {
+    background-color: #1D4ED8;
+}
+
+QPushButton[accent="true"]:pressed {
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+/* Answer Buttons */
+QPushButton[answer_bg="true"] {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 3px solid #000000;
+    font-size: 16px;
+    padding: 12px;
+}
+
+QPushButton[answer_bg="true"]:hover {
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+/* Dialogs & Message Boxes (inherit but we enforce border on window) */
+QDialog, QMessageBox {
+    background-color: #FFFFFF;
+}
+
+/* Big text heading */
+QLabel[heading="true"] {
+    font-size: 20px;
+    font-weight: bold;
+    border: 2px solid #000000;
+    padding: 8px;
+    background-color: #E5E5E5;
+}

@@ -35,6 +35,7 @@ class LoginWindow(QWidget):
         form.addRow("Contraseña:", self._password)
 
         btn_login = QPushButton("Ingresar")
+        btn_login.setProperty("accent", "true")
         btn_login.clicked.connect(self._try_login)
 
         layout = QVBoxLayout(self)

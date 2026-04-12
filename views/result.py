@@ -18,10 +18,15 @@ class ResultWindow(QWidget):
 
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel(f"Jugador: {player_name}"))
-        layout.addWidget(QLabel(f"Puntaje final: {score}"))
+        
+        lbl_score = QLabel(f"Puntaje final: {score}")
+        lbl_score.setProperty("heading", "true")
+        layout.addWidget(lbl_score)
+        
         layout.addWidget(QLabel(msg))
 
         btn = QPushButton("Volver al panel de administración")
+        btn.setProperty("accent", "true")
         btn.clicked.connect(self._back)
         layout.addWidget(btn)
 
