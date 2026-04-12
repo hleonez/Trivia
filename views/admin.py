@@ -1,6 +1,7 @@
 """Admin panel: list/edit preguntas and launch game."""
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QDialog,
@@ -77,9 +78,10 @@ class PreguntaFormDialog(QDialog):
 
 
 class AdminWindow(QWidget):
-    def __init__(self, db: DatabaseManager) -> None:
+    def __init__(self, db: DatabaseManager, menu: QWidget) -> None:
         super().__init__()
         self._db = db
+        self._menu = menu
         self._controller = PreguntaController(db)
         self._juego_preview = JuegoController(db)
         self.setWindowTitle("Quiz — Administración de preguntas")
@@ -93,6 +95,9 @@ class AdminWindow(QWidget):
         self._table.setSelectionMode(QAbstractItemView.SingleSelection)
         self._table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
+        btn_menu = QPushButton("Volver al menú")
+        btn_menu.clicked.connect(self._back_to_menu)
+
         btn_add = QPushButton("Agregar")
         btn_edit = QPushButton("Editar")
         btn_del = QPushButton("Eliminar")
@@ -105,6 +110,7 @@ class AdminWindow(QWidget):
         btn_game.clicked.connect(self._on_game)
 
         row = QHBoxLayout()
+        row.addWidget(btn_menu)
         row.addWidget(btn_add)
         row.addWidget(btn_edit)
         row.addWidget(btn_del)
@@ -118,6 +124,14 @@ class AdminWindow(QWidget):
 
         self._refresh_table()
         self._refresh_record_label()
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        self._menu.show()
+        super().closeEvent(event)
+
+    def _back_to_menu(self) -> None:
+        self._menu.show()
+        self.close()
 
     def refresh_display(self) -> None:
         """Called when returning from the game so labels and table stay in sync."""
@@ -214,5 +228,6 @@ class AdminWindow(QWidget):
         self._refresh_table()
 
     def _on_game(self) -> None:
-        self._game = GameWindow(self._db, self)
+        self.hide()
+        self._game = GameWindow(self._db, self, result_back_label="Volver al panel de administración")
         self._game.show()

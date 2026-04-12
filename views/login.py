@@ -1,28 +1,23 @@
-"""Login view (MVC: only UI; auth via controller)."""
+"""Diálogo de acceso de administrador (solo para el panel de administración)."""
 
 from PySide6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
     QFormLayout,
-    QHBoxLayout,
-    QLabel,
     QLineEdit,
     QMessageBox,
-    QPushButton,
     QVBoxLayout,
-    QWidget,
 )
 
 from controllers.auth_controller import AuthController
-from database.db import DatabaseManager
-from views.admin import AdminWindow
 
 
-class LoginWindow(QWidget):
-    def __init__(self, db: DatabaseManager) -> None:
-        super().__init__()
-        self._db = db
+class AdminLoginDialog(QDialog):
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
         self._auth = AuthController()
-        self.setWindowTitle("Quiz — Inicio de sesión")
-        self.resize(380, 160)
+        self.setWindowTitle("Quiz — Acceso administrador")
+        self.resize(400, 140)
 
         self._user = QLineEdit()
         self._user.setPlaceholderText("Usuario")
@@ -34,27 +29,23 @@ class LoginWindow(QWidget):
         form.addRow("Usuario:", self._user)
         form.addRow("Contraseña:", self._password)
 
-        btn_login = QPushButton("Ingresar")
-        btn_login.setProperty("accent", "true")
-        btn_login.clicked.connect(self._try_login)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self._try_accept)
+        buttons.rejected.connect(self.reject)
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Use las credenciales de administrador (admin / admin)."))
         layout.addLayout(form)
-        row = QHBoxLayout()
-        row.addStretch()
-        row.addWidget(btn_login)
-        layout.addLayout(row)
+        layout.addWidget(buttons)
 
-        self._user.returnPressed.connect(self._try_login)
-        self._password.returnPressed.connect(self._try_login)
+        self._user.returnPressed.connect(self._try_accept)
+        self._password.returnPressed.connect(self._try_accept)
 
-    def _try_login(self) -> None:
+    def _try_accept(self) -> None:
         u = self._user.text()
         p = self._password.text()
         if self._auth.validate(u, p):
-            self._admin = AdminWindow(self._db)
-            self._admin.show()
-            self.close()
+            self.accept()
         else:
             QMessageBox.warning(self, "Acceso denegado", "Usuario o contraseña incorrectos.")

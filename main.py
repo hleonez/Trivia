@@ -11,7 +11,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 
 from database.db import DatabaseManager
-from views.login import LoginWindow
+from views.menu import MenuWindow
 
 
 def main() -> None:
@@ -33,7 +33,7 @@ def main() -> None:
     db.connect()
     db.create_tables()
 
-    window = LoginWindow(db)
+    window = MenuWindow(db)
     window.show()
 
     sys.exit(app.exec())

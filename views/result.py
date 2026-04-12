@@ -4,9 +4,17 @@ from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
 
 class ResultWindow(QWidget):
-    def __init__(self, player_name: str, score: int, new_record: bool, admin_window: QWidget) -> None:
+    def __init__(
+        self,
+        player_name: str,
+        score: int,
+        new_record: bool,
+        return_to: QWidget,
+        *,
+        back_button_text: str = "Volver",
+    ) -> None:
         super().__init__()
-        self._admin = admin_window
+        self._return_to = return_to
         self.setWindowTitle("Quiz — Resultado")
         self.resize(420, 220)
 
@@ -25,12 +33,14 @@ class ResultWindow(QWidget):
         
         layout.addWidget(QLabel(msg))
 
-        btn = QPushButton("Volver al panel de administración")
+        btn = QPushButton(back_button_text)
         btn.setProperty("accent", "true")
         btn.clicked.connect(self._back)
         layout.addWidget(btn)
 
     def _back(self) -> None:
-        self._admin.show()
-        self._admin.refresh_display()
+        self._return_to.show()
+        refresh = getattr(self._return_to, "refresh_display", None)
+        if callable(refresh):
+            refresh()
         self.close()

@@ -1,5 +1,6 @@
 """Game view: quiz session UI."""
 
+from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QGridLayout,
@@ -18,10 +19,18 @@ from views.result import ResultWindow
 
 
 class GameWindow(QWidget):
-    def __init__(self, db: DatabaseManager, admin_window: QWidget) -> None:
+    def __init__(
+        self,
+        db: DatabaseManager,
+        return_to: QWidget,
+        *,
+        result_back_label: str = "Volver",
+    ) -> None:
         super().__init__()
         self._db = db
-        self._admin = admin_window
+        self._return_to = return_to
+        self._result_back_label = result_back_label
+        self._finished_to_result = False
         self._juego = JuegoController(db)
         self.setWindowTitle("Quiz — Juego")
         self.resize(640, 420)
@@ -93,6 +102,11 @@ class GameWindow(QWidget):
         self._update_record_label()
         self._stack.setCurrentIndex(0)
 
+    def closeEvent(self, event: QCloseEvent) -> None:
+        if not self._finished_to_result:
+            self._return_to.show()
+        super().closeEvent(event)
+
     def _update_record_label(self) -> None:
         pts, holder = self._juego.get_record_info()
         if holder is None:
@@ -141,6 +155,9 @@ class GameWindow(QWidget):
         pname = self._juego.player_name()
         new_rec = self._juego.is_new_record()
         self._juego.save_player_result()
-        self._res = ResultWindow(pname, score, new_rec, self._admin)
+        self._finished_to_result = True
+        self._res = ResultWindow(
+            pname, score, new_rec, self._return_to, back_button_text=self._result_back_label
+        )
         self._res.show()
         self.close()
