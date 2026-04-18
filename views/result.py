@@ -1,6 +1,9 @@
 """Result screen after a game."""
 
+from PySide6.QtGui import QShowEvent
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
+
+from views.visual_fx import CRTOverlay, TelemetryPulse, fade_in
 
 
 class ResultWindow(QWidget):
@@ -16,7 +19,9 @@ class ResultWindow(QWidget):
         super().__init__()
         self._return_to = return_to
         self.setWindowTitle("Quiz — Resultado")
-        self.resize(420, 220)
+        self.setObjectName("rootFrame")
+        self.resize(760, 420)
+        self.setMinimumSize(700, 380)
 
         msg = (
             "New record achieved"
@@ -25,18 +30,33 @@ class ResultWindow(QWidget):
         )
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel(f"Jugador: {player_name}"))
+
+        title = QLabel("[ RESULTADO DE MISION ]")
+        title.setProperty("telemetry", "true")
+        self._title_pulse = TelemetryPulse(title, min_opacity=0.78, max_opacity=1.0)
+        self._title_pulse.start()
+        layout.addWidget(title)
+
+        layout.addWidget(QLabel(f"OPERADOR: {player_name}"))
         
-        lbl_score = QLabel(f"Puntaje final: {score}")
+        lbl_score = QLabel(f"PUNTAJE FINAL: {score}")
         lbl_score.setProperty("heading", "true")
         layout.addWidget(lbl_score)
-        
-        layout.addWidget(QLabel(msg))
+
+        status = QLabel(msg.upper())
+        status.setProperty("telemetry", "true")
+        layout.addWidget(status)
 
         btn = QPushButton(back_button_text)
         btn.setProperty("accent", "true")
         btn.clicked.connect(self._back)
         layout.addWidget(btn)
+        self._crt_overlay = CRTOverlay(self)
+        self._intro_anim = None
+
+    def showEvent(self, event: QShowEvent) -> None:
+        self._intro_anim = fade_in(self, 220)
+        super().showEvent(event)
 
     def _back(self) -> None:
         self._return_to.show()

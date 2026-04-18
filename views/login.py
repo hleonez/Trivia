@@ -1,5 +1,6 @@
 """Diálogo de acceso de administrador (solo para el panel de administración)."""
 
+from PySide6.QtGui import QShowEvent
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -10,6 +11,7 @@ from PySide6.QtWidgets import (
 )
 
 from controllers.auth_controller import AuthController
+from views.visual_fx import CRTOverlay, fade_in
 
 
 class AdminLoginDialog(QDialog):
@@ -17,17 +19,19 @@ class AdminLoginDialog(QDialog):
         super().__init__(parent)
         self._auth = AuthController()
         self.setWindowTitle("Quiz — Acceso administrador")
-        self.resize(400, 140)
+        self.setObjectName("rootFrame")
+        self.resize(560, 240)
+        self.setMinimumSize(520, 220)
 
         self._user = QLineEdit()
-        self._user.setPlaceholderText("Usuario")
+        self._user.setPlaceholderText("OPERADOR")
         self._password = QLineEdit()
-        self._password.setPlaceholderText("Contraseña")
+        self._password.setPlaceholderText("CLAVE DE ACCESO")
         self._password.setEchoMode(QLineEdit.Password)
 
         form = QFormLayout()
-        form.addRow("Usuario:", self._user)
-        form.addRow("Contraseña:", self._password)
+        form.addRow("USR_ID:", self._user)
+        form.addRow("PASS_KEY:", self._password)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
@@ -38,9 +42,15 @@ class AdminLoginDialog(QDialog):
         layout = QVBoxLayout(self)
         layout.addLayout(form)
         layout.addWidget(buttons)
+        self._crt_overlay = CRTOverlay(self)
+        self._intro_anim = None
 
         self._user.returnPressed.connect(self._try_accept)
         self._password.returnPressed.connect(self._try_accept)
+
+    def showEvent(self, event: QShowEvent) -> None:
+        self._intro_anim = fade_in(self, 180)
+        super().showEvent(event)
 
     def _try_accept(self) -> None:
         u = self._user.text()

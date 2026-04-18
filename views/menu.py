@@ -1,6 +1,7 @@
 """Pantalla inicial: título del juego, jugar sin login, acceso a administración."""
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QShowEvent
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -14,6 +15,7 @@ from database.db import DatabaseManager
 from views.admin import AdminWindow
 from views.game import GameWindow
 from views.login import AdminLoginDialog
+from views.visual_fx import CRTOverlay, TelemetryPulse, fade_in
 
 
 class MenuWindow(QWidget):
@@ -21,27 +23,36 @@ class MenuWindow(QWidget):
         super().__init__()
         self._db = db
         self.setWindowTitle("Quiz — Menú")
-        self.resize(520, 380)
+        self.setObjectName("rootFrame")
+        self.resize(920, 640)
+        self.setMinimumSize(860, 600)
 
-        title = QLabel("QUIZ")
+        title = QLabel("[ QUIZ / TELEMETRY ]")
         title.setProperty("menuTitle", "true")
 
-        subtitle = QLabel("Ingeniería de software")
+        subtitle = QLabel("UNIT // SOFTWARE ENGINEERING // REV 2.6")
         subtitle.setProperty("menuSubtitle", "true")
 
-        btn_play = QPushButton("Jugar")
+        marker = QLabel("STATUS: READY +++")
+        marker.setProperty("status_green", "true")
+        self._marker_pulse = TelemetryPulse(marker, min_opacity=0.72, max_opacity=1.0)
+        self._marker_pulse.start()
+
+        btn_play = QPushButton(">>> INICIAR MISION")
         btn_play.setProperty("accent", "true")
         btn_play.clicked.connect(self._open_game)
+        btn_play.setMinimumWidth(260)
 
         center = QVBoxLayout()
         center.addStretch(1)
         center.addWidget(title, alignment=Qt.AlignmentFlag.AlignHCenter)
         center.addWidget(subtitle, alignment=Qt.AlignmentFlag.AlignHCenter)
-        center.addSpacing(24)
+        center.addWidget(marker, alignment=Qt.AlignmentFlag.AlignHCenter)
+        center.addSpacing(30)
         center.addWidget(btn_play, alignment=Qt.AlignmentFlag.AlignHCenter)
         center.addStretch(2)
 
-        btn_admin = QPushButton("Administración")
+        btn_admin = QPushButton("[ ADMIN / ACCESS ]")
         btn_admin.clicked.connect(self._open_admin_login)
 
         bottom = QHBoxLayout()
@@ -51,6 +62,12 @@ class MenuWindow(QWidget):
         layout = QVBoxLayout(self)
         layout.addLayout(center)
         layout.addLayout(bottom)
+        self._crt_overlay = CRTOverlay(self)
+        self._intro_anim = None
+
+    def showEvent(self, event: QShowEvent) -> None:
+        self._intro_anim = fade_in(self, 220)
+        super().showEvent(event)
 
     def refresh_display(self) -> None:
         """Misma interfaz que AdminWindow para la pantalla de resultado."""

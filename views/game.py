@@ -1,6 +1,7 @@
 """Game view: quiz session UI."""
 
-from PySide6.QtGui import QCloseEvent
+from PySide6.QtCore import QTimer
+from PySide6.QtGui import QCloseEvent, QShowEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QGridLayout,
@@ -16,6 +17,7 @@ from PySide6.QtWidgets import (
 from controllers.juego_controller import JuegoController
 from database.db import DatabaseManager
 from views.result import ResultWindow
+from views.visual_fx import CRTOverlay, TelemetryPulse, fade_in
 
 
 class GameWindow(QWidget):
@@ -31,25 +33,35 @@ class GameWindow(QWidget):
         self._return_to = return_to
         self._result_back_label = result_back_label
         self._finished_to_result = False
+        self._answer_locked = False
         self._juego = JuegoController(db)
         self.setWindowTitle("Quiz — Juego")
-        self.resize(640, 420)
+        self.setObjectName("rootFrame")
+        self.resize(1080, 760)
+        self.setMinimumSize(980, 700)
 
         # Setup screen
         self._name = QLineEdit()
-        self._name.setPlaceholderText("Nombre del jugador")
+        self._name.setPlaceholderText("NOMBRE DEL OPERADOR")
         self._count = QComboBox()
         for n in (10, 15, 20):
             self._count.addItem(str(n), n)
         self._record_label = QLabel()
+        self._record_label.setProperty("telemetry", "true")
+        self._record_pulse = TelemetryPulse(self._record_label, min_opacity=0.75, max_opacity=1.0)
+        self._record_pulse.start()
         self._btn_start = QPushButton("Comenzar")
         self._btn_start.setProperty("accent", "true")
         self._btn_start.clicked.connect(self._start)
 
+        cfg_title = QLabel("[ CONFIGURACION DE SESION ]")
+        cfg_title.setProperty("telemetry", "true")
+
         setup_layout = QVBoxLayout()
-        setup_layout.addWidget(QLabel("Nombre del jugador:"))
+        setup_layout.addWidget(cfg_title)
+        setup_layout.addWidget(QLabel("OPERADOR:"))
         setup_layout.addWidget(self._name)
-        setup_layout.addWidget(QLabel("Cantidad de preguntas:"))
+        setup_layout.addWidget(QLabel("PAQUETE DE PREGUNTAS:"))
         setup_layout.addWidget(self._count)
         setup_layout.addWidget(self._record_label)
         setup_layout.addWidget(self._btn_start)
@@ -59,15 +71,16 @@ class GameWindow(QWidget):
 
         # Play screen
         self._progress = QLabel()
+        self._progress.setProperty("telemetry", "true")
         self._enunciado = QLabel()
         self._enunciado.setWordWrap(True)
-        btn_a = QPushButton("A")
+        btn_a = QPushButton("[A] // OPCION")
         btn_a.setProperty("answer_bg", "true")
-        btn_b = QPushButton("B")
+        btn_b = QPushButton("[B] // OPCION")
         btn_b.setProperty("answer_bg", "true")
-        btn_c = QPushButton("C")
+        btn_c = QPushButton("[C] // OPCION")
         btn_c.setProperty("answer_bg", "true")
-        btn_d = QPushButton("D")
+        btn_d = QPushButton("[D] // OPCION")
         btn_d.setProperty("answer_bg", "true")
         btn_a.clicked.connect(lambda: self._answer("A"))
         btn_b.clicked.connect(lambda: self._answer("B"))
@@ -80,10 +93,12 @@ class GameWindow(QWidget):
         grid.addWidget(btn_c, 1, 0)
         grid.addWidget(btn_d, 1, 1)
 
-        self._btn_cancel = QPushButton("Cancelar partida")
+        self._btn_cancel = QPushButton("/// CANCELAR PARTIDA")
         self._btn_cancel.clicked.connect(self._cancel)
+        self._answer_buttons = {"A": btn_a, "B": btn_b, "C": btn_c, "D": btn_d}
 
         play_layout = QVBoxLayout()
+        play_layout.addWidget(QLabel("[ FEED DE TELEMETRIA ]"))
         play_layout.addWidget(self._progress)
         play_layout.addWidget(self._enunciado)
         play_layout.addLayout(grid)
@@ -98,9 +113,15 @@ class GameWindow(QWidget):
 
         outer = QVBoxLayout(self)
         outer.addWidget(self._stack)
+        self._crt_overlay = CRTOverlay(self)
+        self._intro_anim = None
 
         self._update_record_label()
         self._stack.setCurrentIndex(0)
+
+    def showEvent(self, event: QShowEvent) -> None:
+        self._intro_anim = fade_in(self, 240)
+        super().showEvent(event)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if not self._finished_to_result:
@@ -110,9 +131,9 @@ class GameWindow(QWidget):
     def _update_record_label(self) -> None:
         pts, holder = self._juego.get_record_info()
         if holder is None:
-            self._record_label.setText("Récord actual: —")
+            self._record_label.setText("[ RECORD ]: ---")
         else:
-            self._record_label.setText(f"Récord actual: {pts} ({holder})")
+            self._record_label.setText(f"[ RECORD ]: {pts} PTS // {holder}")
 
     def _start(self) -> None:
         name = self._name.text()
@@ -122,6 +143,7 @@ class GameWindow(QWidget):
             QMessageBox.warning(self, "No se puede iniciar", msg)
             return
         self._stack.setCurrentIndex(1)
+        fade_in(self._play_page, 170)
         self._show_current_question()
 
     def _show_current_question(self) -> None:
@@ -140,11 +162,32 @@ class GameWindow(QWidget):
         self._enunciado.setText(text)
 
     def _answer(self, letter: str) -> None:
+        if self._answer_locked:
+            return
+        self._answer_locked = True
+        selected = self._answer_buttons[letter]
+        selected.setProperty("answer_state", "hot")
+        selected.style().unpolish(selected)
+        selected.style().polish(selected)
+        for btn in self._answer_buttons.values():
+            btn.setEnabled(False)
+        QTimer.singleShot(130, lambda: self._commit_answer(letter))
+
+    def _commit_answer(self, letter: str) -> None:
+        self._clear_answer_visual_state()
         has_next = self._juego.answer(letter)
         if has_next:
             self._show_current_question()
         else:
             self._finish()
+        self._answer_locked = False
+
+    def _clear_answer_visual_state(self) -> None:
+        for btn in self._answer_buttons.values():
+            btn.setProperty("answer_state", "")
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
+            btn.setEnabled(True)
 
     def _cancel(self) -> None:
         self._juego.cancel()
