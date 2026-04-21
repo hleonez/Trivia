@@ -308,7 +308,6 @@ class DatabaseManager:
         row = cur.fetchone()
         if row is None:
             return None
-<<<<<<< HEAD
         return {"nombre": row["nombre"], "puntaje": int(row["puntaje"])}
 
     def insert_usuario(self, username: str, password_hash: str) -> int:
@@ -325,6 +324,3 @@ class DatabaseManager:
             (username,)
         )
         return cur.fetchone()
-=======
-        return {"nombre": row["nombre"], "puntaje": int(row["puntaje"])}
->>>>>>> 8f6f8f0b41e56e91cd86d4b5e2a808d3a8b5adea
