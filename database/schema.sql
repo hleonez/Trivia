@@ -28,13 +28,6 @@ CREATE TABLE IF NOT EXISTS jugadores (
     puntaje INTEGER NOT NULL DEFAULT 0 CHECK (puntaje >= 0)
 );
 
-<<<<<<< HEAD
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL
-);
-=======
 CREATE INDEX IF NOT EXISTS idx_jugadores_puntaje ON jugadores(puntaje);
 
 CREATE TABLE IF NOT EXISTS partidas (
@@ -62,4 +55,3 @@ CREATE INDEX IF NOT EXISTS idx_respuestas_partida_id ON respuestas(partida_id);
 CREATE INDEX IF NOT EXISTS idx_respuestas_pregunta_id ON respuestas(pregunta_id);
 
 PRAGMA user_version = 3;
->>>>>>> 8f6f8f0b41e56e91cd86d4b5e2a808d3a8b5adea
