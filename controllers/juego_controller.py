@@ -46,7 +46,7 @@ class JuegoController:
             return False, "No hay preguntas en la base de datos. Agregue preguntas primero."
 
         if num_preguntas > len(all_q):
-            num_preguntas = len(all_q)
+            return False, "Cantidad de preguntas insuficientes."
 
         self._preguntas = random.sample(all_q, num_preguntas)
         self._current_index = 0
