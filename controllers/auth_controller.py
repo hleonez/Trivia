@@ -1,9 +1,18 @@
-"""Authentication (prototype: fixed credentials)."""
+"""Authentication (using database and SHA-256 hashing)."""
+
+import hashlib
+from database.db import DatabaseManager
 
 
 class AuthController:
-    _USER = "admin"
-    _PASS = "admin"
+    def __init__(self, db: DatabaseManager):
+        self._db = db
+
+    def hash_password(self, password: str) -> str:
+        return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
     def validate(self, username: str, password: str) -> bool:
-        return username == self._USER and password == self._PASS
+        user = self._db.get_usuario_by_username(username)
+        if user:
+            return user["password_hash"] == self.hash_password(password)
+        return False

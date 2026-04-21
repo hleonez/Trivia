@@ -11,13 +11,14 @@ from PySide6.QtWidgets import (
 )
 
 from controllers.auth_controller import AuthController
+from database.db import DatabaseManager
 from views.visual_fx import CRTOverlay, fade_in
 
 
 class AdminLoginDialog(QDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, db: DatabaseManager, parent=None) -> None:
         super().__init__(parent)
-        self._auth = AuthController()
+        self._auth = AuthController(db)
         self.setWindowTitle("Quiz — Acceso administrador")
         self.setObjectName("rootFrame")
         self.resize(560, 240)

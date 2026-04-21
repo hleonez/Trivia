@@ -79,7 +79,7 @@ class MenuWindow(QWidget):
         self.hide()
 
     def _open_admin_login(self) -> None:
-        dlg = AdminLoginDialog(self)
+        dlg = AdminLoginDialog(self._db, self)
         if dlg.exec() != QDialog.Accepted:
             return
         self._admin = AdminWindow(self._db, self)

@@ -30,6 +30,13 @@ class DatabaseManager:
         sql = schema_file.read_text(encoding="utf-8")
         self.connection.executescript(sql)
         self.connection.commit()
+        
+        # Initialize default admin if no users exist
+        cur = self.connection.execute("SELECT COUNT(*) FROM usuarios")
+        if cur.fetchone()[0] == 0:
+            import hashlib
+            default_pass_hash = hashlib.sha256(b"admin").hexdigest()
+            self.insert_usuario("admin", default_pass_hash)
 
     def insert_pregunta(
         self,
@@ -104,3 +111,18 @@ class DatabaseManager:
         if row is None:
             return None
         return {"nombre": row["nombre"], "puntaje": int(row["puntaje"])}
+
+    def insert_usuario(self, username: str, password_hash: str) -> int:
+        cur = self.connection.execute(
+            "INSERT INTO usuarios (username, password_hash) VALUES (?, ?)",
+            (username, password_hash),
+        )
+        self.connection.commit()
+        return int(cur.lastrowid)
+
+    def get_usuario_by_username(self, username: str) -> sqlite3.Row | None:
+        cur = self.connection.execute(
+            "SELECT id, username, password_hash FROM usuarios WHERE username = ?",
+            (username,)
+        )
+        return cur.fetchone()

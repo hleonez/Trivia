@@ -15,3 +15,9 @@ CREATE TABLE IF NOT EXISTS jugadores (
     nombre TEXT NOT NULL,
     puntaje INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL
+);

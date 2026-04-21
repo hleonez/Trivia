@@ -66,6 +66,10 @@ class GameWindow(QWidget):
         setup_layout.addWidget(self._record_label)
         setup_layout.addWidget(self._btn_start)
 
+        self._btn_back = QPushButton("/// VOLVER AL MENU")
+        self._btn_back.clicked.connect(self.close)
+        setup_layout.addWidget(self._btn_back)
+
         self._setup_page = QWidget()
         self._setup_page.setLayout(setup_layout)
 
