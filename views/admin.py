@@ -217,6 +217,7 @@ class AdminWindow(QWidget):
         if not ok:
             QMessageBox.warning(self, "Validación", msg)
             return
+        QMessageBox.information(self, "Guardado", "Pregunta guardada exitosamente.")
         self._refresh_table()
 
     def _on_edit(self) -> None:
@@ -235,6 +236,7 @@ class AdminWindow(QWidget):
         if not ok:
             QMessageBox.warning(self, "Validación", msg)
             return
+        QMessageBox.information(self, "Guardado", "Pregunta guardada exitosamente.")
         self._refresh_table()
 
     def _on_delete(self) -> None:

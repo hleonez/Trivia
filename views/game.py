@@ -5,10 +5,12 @@ from PySide6.QtGui import QCloseEvent, QShowEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
     QMessageBox,
     QPushButton,
+    QSpinBox,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -27,6 +29,7 @@ class GameWindow(QWidget):
         return_to: QWidget,
         *,
         result_back_label: str = "Volver",
+        player_name: str | None = None,
     ) -> None:
         super().__init__()
         self._db = db
@@ -34,6 +37,10 @@ class GameWindow(QWidget):
         self._result_back_label = result_back_label
         self._finished_to_result = False
         self._answer_locked = False
+        self._num_preguntas = 0
+        self._tiempo_pregunta = 30
+        self._tiempo_restante = 0
+        self._timer_pregunta = None
         self._juego = JuegoController(db)
         self.setWindowTitle("Quiz — Juego")
         self.setObjectName("rootFrame")
@@ -42,10 +49,19 @@ class GameWindow(QWidget):
 
         # Setup screen
         self._name = QLineEdit()
+        if player_name:
+            self._name.setText(player_name)
         self._name.setPlaceholderText("NOMBRE DEL OPERADOR")
         self._count = QComboBox()
         for n in (10, 15, 20):
             self._count.addItem(str(n), n)
+        
+        self._tiempo = QSpinBox()
+        self._tiempo.setMinimum(5)
+        self._tiempo.setMaximum(300)
+        self._tiempo.setValue(30)
+        self._tiempo.setSuffix(" seg")
+        
         self._record_label = QLabel()
         self._record_label.setProperty("telemetry", "true")
         self._record_pulse = TelemetryPulse(self._record_label, min_opacity=0.75, max_opacity=1.0)
@@ -54,15 +70,26 @@ class GameWindow(QWidget):
         self._btn_start.setProperty("accent", "true")
         self._btn_start.clicked.connect(self._start)
 
+        self._btn_back = QPushButton("<<< MENU")
+        self._btn_back.clicked.connect(self._back_to_menu)
+
         cfg_title = QLabel("[ CONFIGURACION DE SESION ]")
         cfg_title.setProperty("telemetry", "true")
 
+        # Título con botón de volver arriba a la derecha
+        title_layout = QHBoxLayout()
+        title_layout.addWidget(cfg_title)
+        title_layout.addStretch()
+        title_layout.addWidget(self._btn_back)
+
         setup_layout = QVBoxLayout()
-        setup_layout.addWidget(cfg_title)
+        setup_layout.addLayout(title_layout)
         setup_layout.addWidget(QLabel("OPERADOR:"))
         setup_layout.addWidget(self._name)
         setup_layout.addWidget(QLabel("PAQUETE DE PREGUNTAS:"))
         setup_layout.addWidget(self._count)
+        setup_layout.addWidget(QLabel("TIEMPO POR PREGUNTA:"))
+        setup_layout.addWidget(self._tiempo)
         setup_layout.addWidget(self._record_label)
         setup_layout.addWidget(self._btn_start)
 
@@ -139,9 +166,15 @@ class GameWindow(QWidget):
         else:
             self._record_label.setText(f"[ RECORD ]: {pts} PTS // {holder}")
 
+    def _back_to_menu(self) -> None:
+        self.hide()
+        self._return_to.show()
+
     def _start(self) -> None:
         name = self._name.text()
         n = int(self._count.currentData())
+        self._num_preguntas = n
+        self._tiempo_pregunta = self._tiempo.value()
         ok, msg = self._juego.start_game(name, n)
         if not ok:
             QMessageBox.warning(self, "No se puede iniciar", msg)
@@ -155,7 +188,13 @@ class GameWindow(QWidget):
         if q is None:
             self._finish()
             return
-        self._progress.setText(self._juego.progress_text())
+        self._tiempo_restante = self._tiempo_pregunta
+        self._update_timer_display()
+        if self._timer_pregunta is not None:
+            self._timer_pregunta.stop()
+        self._timer_pregunta = QTimer()
+        self._timer_pregunta.timeout.connect(self._on_timer_tick)
+        self._timer_pregunta.start(1000)
         text = (
             f"{q.enunciado}\n\n"
             f"A) {q.opcion_a}\n"
@@ -194,17 +233,49 @@ class GameWindow(QWidget):
             btn.setEnabled(True)
 
     def _cancel(self) -> None:
+        if self._timer_pregunta is not None:
+            self._timer_pregunta.stop()
+        confirm = QMessageBox.question(
+            self,
+            "Confirmar",
+            "¿Estás seguro de que quieres cancelar la partida?",
+        )
+        if confirm != QMessageBox.Yes:
+            if self._timer_pregunta is not None:
+                self._timer_pregunta.start()
+            return
         self._juego.cancel()
         self._finish()
 
     def _finish(self) -> None:
+        if self._timer_pregunta is not None:
+            self._timer_pregunta.stop()
         score = self._juego.final_score()
         pname = self._juego.player_name()
         new_rec = self._juego.is_new_record()
         self._juego.save_player_result()
         self._finished_to_result = True
         self._res = ResultWindow(
-            pname, score, new_rec, self._return_to, back_button_text=self._result_back_label
+            pname, score, new_rec, self._db, self._return_to, back_button_text=self._result_back_label, num_preguntas=self._num_preguntas
         )
         self._res.show()
         self.close()
+
+    def _on_timer_tick(self) -> None:
+        self._tiempo_restante -= 1
+        self._update_timer_display()
+        if self._tiempo_restante <= 0:
+            self._timer_pregunta.stop()
+            self._auto_answer()
+
+    def _update_timer_display(self) -> None:
+        prog_text = self._juego.progress_text()
+        self._progress.setText(f"{prog_text}  |  Tiempo: {self._tiempo_restante}s")
+
+    def _auto_answer(self) -> None:
+        if self._answer_locked:
+            return
+        self._answer_locked = True
+        for btn in self._answer_buttons.values():
+            btn.setEnabled(False)
+        self._commit_answer("")
