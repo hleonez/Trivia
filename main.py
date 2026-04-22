@@ -28,7 +28,6 @@ def main() -> None:
     except FileNotFoundError:
         pass
 
-
     db = DatabaseManager()
     db.connect()
     db.create_tables()

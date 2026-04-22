@@ -47,7 +47,6 @@ class GameWindow(QWidget):
         self.resize(1080, 760)
         self.setMinimumSize(980, 700)
 
-        # Setup screen
         self._name = QLineEdit()
         if player_name:
             self._name.setText(player_name)
@@ -76,7 +75,6 @@ class GameWindow(QWidget):
         cfg_title = QLabel("[ CONFIGURACION DE SESION ]")
         cfg_title.setProperty("telemetry", "true")
 
-        # Título con botón de volver arriba a la derecha
         title_layout = QHBoxLayout()
         title_layout.addWidget(cfg_title)
         title_layout.addStretch()
@@ -100,7 +98,6 @@ class GameWindow(QWidget):
         self._setup_page = QWidget()
         self._setup_page.setLayout(setup_layout)
 
-        # Play screen
         self._progress = QLabel()
         self._progress.setProperty("telemetry", "true")
         self._enunciado = QLabel()

@@ -27,7 +27,7 @@ from views.visual_fx import CRTOverlay, TelemetryPulse, fade_in
 
 
 class PreguntaFormDialog(QDialog):
-    """Modal form for create/update (no business logic)."""
+    """Modal form for create/update."""
 
     def __init__(self, parent: QWidget | None, title: str, pregunta: Pregunta | None = None) -> None:
         super().__init__(parent)
