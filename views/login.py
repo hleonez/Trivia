@@ -31,8 +31,8 @@ class AdminLoginDialog(QDialog):
         self._password.setEchoMode(QLineEdit.Password)
 
         form = QFormLayout()
-        form.addRow("USR_ID:", self._user)
-        form.addRow("PASS_KEY:", self._password)
+        form.addRow("ID_USR:", self._user)
+        form.addRow("CLAVE_ACCESO:", self._password)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel

@@ -97,13 +97,13 @@ class AdminWindow(QWidget):
         self._record_pulse = TelemetryPulse(self._record_label, min_opacity=0.72, max_opacity=1.0)
         self._record_pulse.start()
         self._table = QTableWidget(0, 4)
-        self._table.setHorizontalHeaderLabels(["ID", "ENUNCIADO", "RSP", "OPCIONES // RESUMEN"])
+        self._table.setHorizontalHeaderLabels(["ID", "ENUNCIADO", "RESP", "OPCIONES // RESUMEN"])
         self._table.horizontalHeader().setStretchLastSection(True)
         self._table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self._table.setSelectionMode(QAbstractItemView.SingleSelection)
         self._table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        title = QLabel("[ PANEL DE TELEMETRIA ADMIN ]")
+        title = QLabel("[ PANEL DE TELEMETRÍA ADMIN ]")
         title.setProperty("telemetry", "true")
 
         btn_menu = QPushButton("<<< MENU")
@@ -159,7 +159,7 @@ class AdminWindow(QWidget):
         rec = self._juego_preview.get_record_info()
         max_pts, holder = rec
         if holder is None:
-            self._record_label.setText("[ RECORD ]: --- // SIN PARTIDAS")
+            self._record_label.setText("[ RÉCORD ]: --- // SIN PARTIDAS")
         else:
             self._record_label.setText(f"[ RECORD ]: {max_pts} PTS // {holder}")
 

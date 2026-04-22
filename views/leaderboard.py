@@ -31,7 +31,7 @@ class LeaderboardDialog(QDialog):
 
         top_scores = self._db.get_top_5_scores()
         if not top_scores:
-            lbl_empty = QLabel("NO DATA FOUND")
+            lbl_empty = QLabel("NO HAY DATOS")
             lbl_empty.setAlignment(Qt.AlignmentFlag.AlignHCenter)
             layout.addWidget(lbl_empty)
         else:

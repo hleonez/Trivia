@@ -30,9 +30,9 @@ class ResultWindow(QWidget):
         self.setMinimumSize(700, 380)
 
         msg = (
-            "New record achieved"
+            "Nuevo récord logrado"
             if new_record
-            else "You did not beat the current record"
+            else "No superaste el récord actual"
         )
 
         layout = QVBoxLayout(self)

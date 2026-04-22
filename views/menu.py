@@ -31,10 +31,10 @@ class MenuWindow(QWidget):
         title = QLabel("[ QUIZ / TELEMETRY ]")
         title.setProperty("menuTitle", "true")
 
-        subtitle = QLabel("UNIT // SOFTWARE ENGINEERING // REV 2.6")
+        subtitle = QLabel("UNIDAD // INGENIERÍA DE SOFTWARE // REV 2.6")
         subtitle.setProperty("menuSubtitle", "true")
 
-        marker = QLabel("STATUS: READY +++")
+        marker = QLabel("ESTADO: LISTO +++")
         marker.setProperty("status_green", "true")
         self._marker_pulse = TelemetryPulse(marker, min_opacity=0.72, max_opacity=1.0)
         self._marker_pulse.start()
@@ -59,7 +59,7 @@ class MenuWindow(QWidget):
         center.addWidget(btn_leaderboard, alignment=Qt.AlignmentFlag.AlignHCenter)
         center.addStretch(2)
 
-        btn_admin = QPushButton("[ ADMIN / ACCESS ]")
+        btn_admin = QPushButton("[ ADMIN / ACCESO ]")
         btn_admin.clicked.connect(self._open_admin_login)
 
         bottom = QHBoxLayout()
