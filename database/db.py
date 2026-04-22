@@ -310,6 +310,18 @@ class DatabaseManager:
             return None
         return {"nombre": row["nombre"], "puntaje": int(row["puntaje"])}
 
+    def get_top_5_scores(self) -> list[dict[str, Any]]:
+        """Returns the top 5 scores from the jugadores table."""
+        cur = self.connection.execute(
+            """
+            SELECT nombre, puntaje
+            FROM jugadores
+            ORDER BY puntaje DESC, id ASC
+            LIMIT 5
+            """
+        )
+        return [{"nombre": row["nombre"], "puntaje": int(row["puntaje"])} for row in cur.fetchall()]
+
     def insert_usuario(self, username: str, password_hash: str) -> int:
         cur = self.connection.execute(
             "INSERT INTO usuarios (username, password_hash) VALUES (?, ?)",

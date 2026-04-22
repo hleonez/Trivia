@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 from database.db import DatabaseManager
 from views.admin import AdminWindow
 from views.game import GameWindow
+from views.leaderboard import LeaderboardDialog
 from views.login import AdminLoginDialog
 from views.visual_fx import CRTOverlay, TelemetryPulse, fade_in
 
@@ -47,9 +48,15 @@ class MenuWindow(QWidget):
         center.addStretch(1)
         center.addWidget(title, alignment=Qt.AlignmentFlag.AlignHCenter)
         center.addWidget(subtitle, alignment=Qt.AlignmentFlag.AlignHCenter)
+        btn_leaderboard = QPushButton("[ HISTORIAL DE OPERADORES ]")
+        btn_leaderboard.clicked.connect(self._open_leaderboard)
+        btn_leaderboard.setMinimumWidth(260)
+
         center.addWidget(marker, alignment=Qt.AlignmentFlag.AlignHCenter)
         center.addSpacing(30)
         center.addWidget(btn_play, alignment=Qt.AlignmentFlag.AlignHCenter)
+        center.addSpacing(10)
+        center.addWidget(btn_leaderboard, alignment=Qt.AlignmentFlag.AlignHCenter)
         center.addStretch(2)
 
         btn_admin = QPushButton("[ ADMIN / ACCESS ]")
@@ -85,3 +92,7 @@ class MenuWindow(QWidget):
         self._admin = AdminWindow(self._db, self)
         self._admin.show()
         self.hide()
+
+    def _open_leaderboard(self) -> None:
+        dlg = LeaderboardDialog(self._db, self)
+        dlg.exec()

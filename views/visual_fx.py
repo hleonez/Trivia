@@ -86,3 +86,4 @@ class CRTOverlay(QWidget):
 
         beam = QColor(230, 25, 25, 24)
         painter.fillRect(0, self._scan_y, w, 2, beam)
+        painter.end()
